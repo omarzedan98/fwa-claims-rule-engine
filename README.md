@@ -2,132 +2,107 @@
 
 *Portfolio project · Healthcare claims automation*
 
-A rule engine that screens health-insurance claim exports for fraud, waste and abuse. It runs
-32 rules over every claim and service line, writes a reason next to each
-finding, and adapts to whatever layout the claims export arrives in.
+A rule engine that screens health-insurance claims for fraud, waste and abuse. 32 rules check every claim and service line, explain each finding, and work with any claims export layout.
 
-This example is built for the Saudi market, using NPHIES service codes (SBS), ICD-10, the SFDA
-drug register and the NPHIES GTIN list. The rules are not tied to them: the code lists can be
-swapped for other standards, such as CPT, HCPCS, ICD-10-CM or NDC drug codes.
+Built on Saudi standards (NPHIES SBS, ICD-10, SFDA, GTIN); the code lists can be swapped for CPT, HCPCS, ICD-10-CM or NDC.
 
-**32** validation rules · **5** claim-level · **27** service-line level · **Any** export layout or file size
+| 📋 **32 validation rules**<br><sub>Run over every claim and service line</sub> | 🧾 **5 claim-level rules**<br><sub>Judge whole claims: duplicates, clones, capacity</sub> |
+|---|---|
+| 🔍 **27 service-line rules**<br><sub>Judge each line: coding, frequency, pharmacy</sub> | 📂 **Any layout, any size**<br><sub>Export columns mapped once and remembered</sub> |
 
-**[Case study website](https://omarzedan98.github.io/fwa-claims-rule-engine/)** · **[Flowchart for every rule](FLOWCHARTS.md)** ([web version](https://omarzedan98.github.io/fwa-claims-rule-engine/rule-flowcharts.html)) · **[PDF](FWA-Claims-Rule-Engine-Case-Study.pdf)** · **[Demo video, 1 min](https://omarzedan98.github.io/fwa-claims-rule-engine/FWA-Claims-Rule-Engine-Demo.mp4)**
+**[👉 Open the rule flowcharts](FLOWCHARTS.md)**
 
 ## The problem
 
-Medical claim audit is mostly manual. Reviewers sample claims and look for the same patterns again
-and again: the same service billed twice, a diagnosis that cannot apply to the patient's age or sex,
-one claim copied across many members, drugs that duplicate each other, a visit billed after the
-policy expired. Each check is simple; doing all of them on every line of a large export is not.
+Claim audit is mostly manual: reviewers sample claims and hunt for the same patterns, such as duplicate services, diagnoses that don't fit the patient's age or sex, cloned claims, duplicate drugs, or visits after a policy expired. Each check is simple; running all of them on every line is not.
 
-This project turns those checks into explicit, documented rules that run on the whole file in one
-pass, against the coding standards providers bill with: NPHIES service codes (SBS), ICD-10 diagnoses,
-the SFDA drug register and the NPHIES GTIN list.
+This engine turns those checks into documented rules that run on the whole file in one pass.
 
 ## How it works
 
-1. **Map the export.** A column converter matches the file's headers to a 60-column claims
-   template. Headers are mapped once in the app and remembered; older export spellings are
-   recognised automatically. Service-type wording (CONS, MEDS, LBRD…) maps to seven types.
-2. **Load the standards.** SBS, ICD-10, the SFDA drug list and the NPHIES GTIN list sit next to the
-   app and are reused every run. Uploading a newer version replaces the stored copy.
-3. **Run the rules.** Unpaid lines are set aside, then the claim-level rules and the service-line
-   rules run in a fixed order, so a rule that depends on another always sees its result.
-4. **Deliver the findings.** An Excel workbook with a reason written next to every flagged line, in
-   the layout the reviewer chose before the run, ready to hand to the audit team.
-5. **Track it on the dashboard.** Alongside the workbook, an interactive dashboard turns the
-   findings into money and trends: billed against rejected amount, rejections by rule and provider,
-   and how both move month by month.
+1. **Map the export.** Headers are matched once to a 60-column template and remembered.
+2. **Load the standards.** SBS, ICD-10, SFDA and GTIN lists are stored and reused.
+3. **Run the rules.** Unpaid lines are set aside; claim and service-line rules run in a fixed order.
+4. **Deliver the findings.** An Excel workbook with a reason next to every flagged line.
+5. **Track it on the dashboard.** Findings turned into money and trends by rule and provider.
 
 > **Why the dashboard matters**
 >
-> A findings list says what is wrong; the dashboard says where to act first. It shows how much of
-> what was paid the rules would reject, which providers and which rules drive that amount, and
-> whether a pattern is growing or fading over time. That turns screening into something a manager
-> can prioritise and report on: rejection rate, savings by rule, and providers to audit or educate.
+> The findings list says what's wrong; the dashboard says where to act first.
 >
-> - **Headline cards**: total paid and rejected amount, with the rejection rate. A line that breaks
->   several rules is counted once, so the rejected amount is never inflated.
-> - **Billed and rejected over time**: one line per provider, by month, quarter or year, to spot a
->   provider whose billing or rejections jump.
-> - **Rejected amount by rule**: which rules carry the money, at claim or service level; any rule
->   can be hidden so the others rescale into view.
-> - **Provider behaviour**: each provider's share of unlisted codes against its limit, and the
->   services a provider or physician attaches to most of their claims.
-> - **Filters**: provider, period (year, quarter, month or a custom range) and service type,
->   applied across the page.
+> - **Headline cards**: paid vs rejected amount and the rejection rate, each line counted once.
+> - **Trends**: billed and rejected amounts per provider over time.
+> - **By rule**: which rules carry the rejected money.
+> - **Provider behaviour**: unlisted-code shares and over-used services.
+> - **Filters**: provider, period and service type.
 
 ## See it in action
 
-*Screens from the working app, run on a synthetic claims file built for this portfolio. Every
-patient, physician, provider and claim in them is invented; only the medical and drug codes are
-real public codes. A one-minute [demo video](https://omarzedan98.github.io/fwa-claims-rule-engine/FWA-Claims-Rule-Engine-Demo.mp4) shows the app running end to end.*
+*Screens from the app, run on a synthetic claims file. All patients, physicians, providers and claims are invented.*
+
+[![▶ Demo: the app running end to end, one minute](assets/screens/video_poster.jpg)](FWA-Claims-Rule-Engine-Demo.mp4)
+
+<sub>▶ Demo: the app running end to end, one minute (click to open)</sub>
 
 ### Run screen
 
-Upload the claims file; the four coding standards are stored and reused. The results layout is chosen before the run.
+Upload the claims file and choose the results layout.
 
 ![Run screen](assets/screens/upload.jpg)
 
 ### Column converter
 
-Each template field is mapped once to the file's own header, and the file's service-type wording to seven types. Saved and reused on every run.
+Map the file's headers and service types once; they're reused every run.
 
 ![Column converter](assets/screens/mapping.jpg)
 
 ### Results
 
-What the run covered - total claims (distinct claim IDs) and total service lines - then a count for every rule, claim level and service level, and the workbook download.
+Total claims and service lines, then a count per rule.
 
 ![Results](assets/screens/results.jpg)
 
 ### What the reviewer gets
 
-Two download layouts. **One row per finding** lists each broken rule with its code, description and
-note. **One row per line** keeps every line of the uploaded file and adds a column for every rule,
-claim rules first, then a count and the names of every rule the line broke.
-
-A slice of the real workbook from the demo run: 14,732 lines across 97 columns. The letters above
-the headers are the columns' positions in the full sheet; rule cells hold the rule's description
-and its note.
+Two layouts: **one row per finding**, or **one row per line** with a column for every rule plus a count and the names of the rules each line broke. Below, a slice of the demo workbook (14,732 lines, 97 columns).
 
 ![Results workbook: one row per line](assets/screens/excel_output.jpg)
 
 ### Dashboard: overview
 
-Filters for provider, period and service type; total paid against rejected, with the rejection rate.
+Filters and paid vs rejected totals.
 
 ![Dashboard: overview](assets/screens/dashboard_overview.jpg)
 
 ### Dashboard: trend by provider
 
-Billed amount per provider by month, quarter or year. A matching chart below it shows the rejected amount.
+Billed amount per provider over time.
 
 ![Dashboard: trend by provider](assets/screens/dashboard_trend.jpg)
 
 ### Dashboard: where the money is
 
-Rejected amount by rule, at service or claim level. Any rule can be hidden so the others rescale into view.
+Rejected amount by rule.
 
 ![Dashboard: where the money is](assets/screens/dashboard_by_rule.jpg)
 
 ### Dashboard: provider behaviour
 
-Each provider's share of unlisted codes, drugs and services separately, against the limits the S18 rules apply.
+Each provider's unlisted-code share against the S18 limits.
 
 ![Dashboard: provider behaviour](assets/screens/dashboard_unlisted.jpg)
 
 ### Dashboard: physician pattern
 
-Physicians attaching the same services or drugs to most of their claims - each doctor's items side by side, every bar above the 70% line of rule S19-2.
+Services each physician attaches to over 70% of their claims (rule S19-2).
 
 ![Dashboard: physician pattern](assets/screens/dashboard_physician.jpg)
 
 ## The 32 rules
 
-Grouped by what they look for. Each has a flowchart, a reference entry and a note template, so every
-finding says why it was raised. **[See the flowchart for every rule →](FLOWCHARTS.md)**
+Each rule has a flowchart and a note template, so every finding says why it was raised.
+
+**[👉 Open the rule flowcharts](FLOWCHARTS.md)**
 
 ### Claim level · 5 rules
 
@@ -195,42 +170,29 @@ finding says why it was raised. **[See the flowchart for every rule →](FLOWCHA
 
 **Any layout**
 
-- A 60-column template covers member, policy, claim, diagnosis, service, amount and rejection fields.
-- A mapping screen ties each template field to the file's own header; the mapping is saved and reused.
-- Fields a file does not have are created blank, so a partial export still runs; rules that need a
-  missing field say so instead of failing.
-- Results are written back under the file's own header names.
+- A 60-column template, mapped once to the file's own headers.
+- Missing fields are created blank; rules that need them say so.
+- Results keep the file's own header names.
 
 **Any size**
 
-- No fixed line limit: rules work on whole columns at once rather than row by row.
-- A results sheet that passes Excel's 1,048,575-row limit continues on a second sheet automatically.
-- A fast copy of the upload (Parquet) makes repeat runs on the same file load in seconds.
-- Reference tables can be swapped for newer releases without touching the rules.
+- Rules work on whole columns, so there's no line limit.
+- Results past Excel's row limit continue on a second sheet.
+- Repeat runs load in seconds from a cached copy.
 
 ## How the rules were set and proven
 
-- **Thresholds from the data.** Limits were measured before they were chosen. For example, the
-  excessive-visits rule counts each patient's visit days in a rolling 30 days; visit counts are
-  heavily skewed, so the limit came from Tukey's outlier fences on that distribution rather than a guess.
-- **Tested at the boundary.** Every rule has tests built at its exact limit: at the threshold it
-  stays quiet, one past it fires, the wrong service type never fires, and a missing reference
-  leaves it silent with a warning instead of an error.
-- **Checked against a recount.** On a full file, each new or changed rule is recounted by a
-  separately written method and compared line by line, and every other rule is confirmed unchanged
-  before the change is kept.
-- **Documented for review.** A rules reference workbook, a flowchart per rule, and a shared review
-  page where stakeholders comment on a rule after reviewing its results.
+- 📏 **Thresholds from the data.** Limits were measured, not guessed; the excessive-visits limit, for example, came from Tukey's outlier fences.
+- 🎯 **Tested at the boundary.** Each rule is tested at its exact limit: quiet at the threshold, firing one past it.
+- 🔁 **Checked against a recount.** Every new or changed rule is recounted independently, line by line, and the other rules confirmed unchanged.
+- 📝 **Documented for review.** A reference workbook, a flowchart per rule, and a review page for stakeholder comments.
 
 ## My role and tools
 
-I designed every rule, chose and tested the thresholds against real-world claim patterns, specified
-how findings are reported, and validated the results. The engine is implemented in Python (pandas)
-with a Streamlit app and dashboard, built with AI-assisted development.
+I designed the rules, set and tested the thresholds, defined how findings are reported, and validated the results. Built in Python (pandas) with a Streamlit app, using AI-assisted development.
 
 `Python` `pandas` `Streamlit` `Altair` `Excel` `NPHIES SBS` `ICD-10` `SFDA drug register` `GTIN`
 
 ---
 
-<sub>A personal portfolio project. No claims data, patient information or provider details are
-shown. The engine's source code is kept private; this repository holds the public write-up only.</sub>
+<sub>Personal portfolio project. No real claims, patient or provider data is shown. The engine's source code is kept private; this repository holds the public write-up only.</sub>
